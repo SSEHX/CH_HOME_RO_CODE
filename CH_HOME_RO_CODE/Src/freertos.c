@@ -105,28 +105,18 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the thread(s) */
-  /* definition and creation of AppTask */
-  osThreadDef(AppTask, StartAppTask, osPriorityHigh, 0, 128);
-  AppTaskHandle = osThreadCreate(osThread(AppTask), NULL);
 
   /* definition and creation of Bc95InitTask */
-  osThreadDef(Bc95InitTask, StartBc95InitTask, osPriorityIdle, 0, 800);
+  osThreadDef(Bc95InitTask, StartBc95InitTask, osPriorityIdle, 0, 1024);
   Bc95InitTaskHandle = osThreadCreate(osThread(Bc95InitTask), NULL);
 
-  /* definition and creation of ControlTask */
-  osThreadDef(ControlTask, StartControlTask, osPriorityAboveNormal, 0, 128);
-  ControlTaskHandle = osThreadCreate(osThread(ControlTask), NULL);
-
-  /* definition and creation of ErrorCheckTask */
-  osThreadDef(ErrorCheckTask, StartErrorCheckTask, osPriorityIdle, 0, 256);
-  ErrorCheckTaskHandle = osThreadCreate(osThread(ErrorCheckTask), NULL);
-
-  /* definition and creation of Bc95RecvTask */
-  osThreadDef(Bc95RecvTask, StartBc95RecvTask, osPriorityRealtime, 0, 800);
-  Bc95RecvTaskHandle = osThreadCreate(osThread(Bc95RecvTask), NULL);
+  if(device_status.device_registe == 1){
+      osThreadDef(ControlTask, StartControlTask, osPriorityAboveNormal, 0, 256);
+      ControlTaskHandle = osThreadCreate(osThread(ControlTask), NULL);
+  }
 
   /* definition and creation of Bc95SendTask */
-  osThreadDef(Bc95SendTask, StartBc95SendTask, osPriorityIdle, 0, 800);
+  osThreadDef(Bc95SendTask, StartBc95SendTask, osPriorityIdle, 0, 1024);
   Bc95SendTaskHandle = osThreadCreate(osThread(Bc95SendTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -147,31 +137,40 @@ void StartAppTask(void const * argument)
     /* Infinite loop */
     for(;;)
     {
-        _system_led;
         
         send_data_time_count++;
         
-        if(device_status.device_mode == 1){             //设备为租赁模式
+        if(device_status.device_mode == 1){              //设备为租赁模式
             
-            if(device_status.arrears_boot == 0){        //如果设备欠费则停机
+            if(device_status.arrears_boot == 0){         //如果设备欠费则停机
                 device_status.boot = 0;
             }
             
-            if(device_status.flow_or_time == 1){        //流量模式
+            if(device_status.flow_or_time == 1){         //流量模式
                 
-            }else if(device_status.flow_or_time == 2){ //时间模式
+                if(device_status.server_flow <= 0){
+                    device_status.arrears_boot = 0;
+                }
                 
+            }else if(device_status.flow_or_time == 2){  //时间模式
+                //如果时间到则停机
+                if(device_status.server_time <= 0){
+                    device_status.arrears_boot = 0;      //设置停机
+                }
             }
+            
         }else if(device_status.device_mode == 2){       //设备为零售模式
             //零售模式不存在停机开关机，永远停机开机
-            device_status.arrears_boot = 1;      
+            device_status.arrears_boot = 1;
         }
         
-        if(send_data_time_count >= 2880){               //48分钟发送一次
+        if(send_data_time_count >= 57600){               //48分钟发送一次
             bc95_status.need_send = 1;
             send_data_time_count = 0;
         }
-        osDelay(1000);
+        
+        feed_wdi();
+        osDelay(50);
     }
   /* USER CODE END StartAppTask */
 }
@@ -183,15 +182,33 @@ void StartBc95InitTask(void const * argument)
     /* Infinite loop */
     for(;;)
     {
+        
+        beep(255);
+        osDelay(256);
+        beep(255);
+       
         if(device_status.bc95_run){
+            //开启计费系统
+            /* definition and creation of AppTask */
+            osThreadDef(AppTask, StartAppTask, osPriorityHigh, 0, 256);
+            AppTaskHandle = osThreadCreate(osThread(AppTask), NULL);
+            
+            //如果系统第一次启动，不会启动控制系统，如果检测到控制系统未启动，则
+            //开启控制系统
+            if(ControlTaskHandle == NULL && device_status.device_registe == 1){
+                osThreadDef(ControlTask, StartControlTask, osPriorityAboveNormal, 0, 256);
+                ControlTaskHandle = osThreadCreate(osThread(ControlTask), NULL);
+            }else{
+                //device_status.arrears_boot = 0;
+            }
             
             //开始检查bc95接收任务
             /* definition and creation of Bc95RecvTask */
-            osThreadDef(Bc95RecvTask, StartBc95RecvTask, osPriorityIdle, 0, 512);
+            osThreadDef(Bc95RecvTask, StartBc95RecvTask, osPriorityIdle, 0, 1024);
             Bc95RecvTaskHandle = osThreadCreate(osThread(Bc95RecvTask), NULL);
             
             /* definition and creation of ErrorCheckTask */
-            osThreadDef(ErrorCheckTask, StartErrorCheckTask, osPriorityIdle, 0, 400);
+            osThreadDef(ErrorCheckTask, StartErrorCheckTask, osPriorityIdle, 0, 256);
             ErrorCheckTaskHandle = osThreadCreate(osThread(ErrorCheckTask), NULL);
             
             status_network_led(GPIO_PIN_SET);
@@ -214,6 +231,7 @@ void StartControlTask(void const * argument)
     for(;;)
     {
         //boot_rinse();
+        _system_led;
         
         //如果需要冲洗，则开启冲洗
         if(device_status.rinse){
@@ -230,8 +248,8 @@ void StartControlTask(void const * argument)
             
             if(no_water_count >= 5){    //如果连续10秒没有水
                 device_error.raw_no_water = 1;
-                
             }
+            
         }else{
             //清空缺水计数
             no_water_count = 0;
@@ -250,6 +268,12 @@ void StartControlTask(void const * argument)
                 start_create_water();
             }
         }
+        
+                //如果到时间则冲洗
+        if(device_status.create_water_time_m >= (device_status.create_water_time_rinse * 15)){
+            device_status.rinse = 1;
+        }
+                
         osDelay(2000);
     }
   /* USER CODE END StartControlTask */
@@ -269,13 +293,13 @@ void StartErrorCheckTask(void const * argument)
         
         //累加20次漏水检测结果
         uint32_t leakage_value = 0;
-        for(uint8_t i = 0 ; i < 20 ; i++){
+        for(uint8_t i = 0 ; i < 10 ; i++){
             leakage_value += adc_value[ i * 3 ];
         }
         /* 计算漏水检测到的数值，并判断是否漏水，如果本次漏水则将漏水计数+1
         如果不漏水则清0， 
         */
-        if(leakage_value/20 <= 2500){
+        if(leakage_value/10 <= 2500){
             leakage_count++;
         }else{
             leakage_count = 0;
@@ -325,7 +349,7 @@ void StartErrorCheckTask(void const * argument)
             if(device_error.leakage == 1 && device_error.leakage_sended == 0){
                 device_status.boot = 0;                 //漏水关机,
                 bc95_status.need_send = 1;
-            }
+            }      
             status_error_led(GPIO_PIN_SET);
         }else{
             device_status.processing_status = 0;
@@ -384,8 +408,10 @@ void StartBc95SendTask(void const * argument)
             }
             
             bc95_send_coap(cmd_coap_send_ok);
+            eeprom_save_device_status(NO);
         }
-        osDelay(1000);
+        feed_wdi();
+        osDelay(10);
     }
   /* USER CODE END StartBc95SendTask */
 }

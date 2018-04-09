@@ -117,15 +117,32 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  //开启看门狗
-  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
-  open_wdi();
-  device_status.rinse = 1;      //开机冲洗，
-  device_status.boot = 1;       //设置设备开机
-  start_adc();                  //开启adc转换
-  
-  //HAL_TIM_IC_Start_IT(htim3, TIM_CHANNEL_3);
-  
+    
+    __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+    
+    device_status.rinse = 1;      //开机冲洗，
+    device_status.boot = 1;       //设置设备开机
+    start_adc();                  //开启adc转换
+    
+    HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+    HAL_TIM_Base_Start_IT(&htim1);
+    
+    //读取eeprom
+    eeprom_read_device_status();
+    
+    if(device_status.device_registe != 1){
+        HAL_Delay(100);
+        
+        eeprom_save_device_status(YES);
+        HAL_Delay(100);
+        eeprom_read_device_status();
+        device_status.rinse_time = 10;                  //默认冲洗10秒
+        device_status.create_water_time_rinse = 1;      //制水1刻钟 15分钟冲洗
+        device_status.device_mode = 1;                  //默认为租赁模式
+        HAL_Delay(100);
+        eeprom_save_device_status(NO);
+    }
+        
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -223,6 +240,15 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+    
+    if (htim->Instance == TIM1) {
+        //制水时间计时器，每秒记一次，如果满60则加一分钟
+        device_status.create_water_time_s++;
+        if(device_status.create_water_time_s >= 60){
+            device_status.create_water_time_m++;
+            device_status.create_water_time_s = 0;
+        }
+    }
     
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM4) {

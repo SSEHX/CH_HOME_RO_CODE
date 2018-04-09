@@ -35,6 +35,7 @@ uint8_t registe_device(){
         #ifdef DEBUG
         printf("device is registed ...");
         #endif
+        return OK;
     }else{
         if(bc95_send_coap("+NNMI") == OK){
             bc95_read_coap(BC95_TIMEOUT);
@@ -46,5 +47,4 @@ uint8_t registe_device(){
             return ERROR;
         }
     }
-    return ERROR;
 }

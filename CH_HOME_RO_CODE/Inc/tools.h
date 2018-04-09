@@ -22,29 +22,33 @@
 #define ARREARS_BOOT_ADDR   20        //停机开关机                    //   
 #define QR_CODE_ADDR        21        //二维码                        //
 
+#define YES                 1
+#define NO                  0
 
-extern uint32_t adc_value[60];
+extern uint32_t adc_value[30];
+
+extern uint32_t flow_count;
 
 #define LOW_SWITCH_PORT         GPIOC
-#define LOW_SWITCH_PIN          GPIO_PIN_11
+#define LOW_SWITCH_PIN          GPIO_PIN_10
 #define HIGH_SWITCH_PORT        GPIOC
-#define HIGH_SWITCH_PIN         GPIO_PIN_10
+#define HIGH_SWITCH_PIN         GPIO_PIN_11
 
-#define RINSE_PORT              GPIOB
-#define RINSE_PIN               GPIO_PIN_4
+#define RINSE_PORT              GPIOC
+#define RINSE_PIN               GPIO_PIN_12
 
 #define CREATE_WATER_PORT       GPIOB
 #define CREATE_WATER_PIN        GPIO_PIN_3
 
-#define PUMP_PORT               GPIOC
-#define PUMP_PIN                GPIO_PIN_12
+#define PUMP_PORT               GPIOB
+#define PUMP_PIN                GPIO_PIN_4
 
 #define SYSTEM_LED_PORT         GPIOA
 #define SYSTEM_LED_PIN          GPIO_PIN_12
 #define _system_led             HAL_GPIO_TogglePin(SYSTEM_LED_PORT, SYSTEM_LED_PIN)
 
 #define NETWORK_LED_PORT        GPIOB
-#define NETWORK_LED_PIN         GPIO_PIN_9
+#define NETWORK_LED_PIN         GPIO_PIN_8
 #define _network_led            HAL_GPIO_TogglePin(NETWORK_LED_PORT, NETWORK_LED_PIN)
 
 extern uint32_t flash_pages_data[FLASH_DATA_LEN];
@@ -53,9 +57,8 @@ uint8_t *ByteToHexStr(const uint8_t* source, uint32_t sourceLen);
 
 void start_adc();
 
-void flash_write(uint32_t *data);
-void flash_write_word(uint8_t address, uint32_t data);
-uint32_t flash_read(uint32_t addr);
+void eeprom_save_device_status(uint8_t set_zero);
+void eeprom_read_device_status();
 
 void processing_server_command();
 void flash_device_status();

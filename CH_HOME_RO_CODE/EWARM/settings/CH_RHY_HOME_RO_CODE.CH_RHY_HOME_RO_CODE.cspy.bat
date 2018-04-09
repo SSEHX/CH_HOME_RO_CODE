@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\common\bin\cspybat" -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_RHY_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.general.xcl" --backend -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_RHY_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\common\bin\cspybat" -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.general.xcl" --backend -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\common\bin\cspybat" -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_RHY_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.general.xcl" "--debug_file=%~1" --backend -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_RHY_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\common\bin\cspybat" -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.general.xcl" "--debug_file=%~1" --backend -f "C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_HOME_RO_CODE\EWARM\settings\CH_RHY_HOME_RO_CODE.CH_RHY_HOME_RO_CODE.driver.xcl" 
 
 @echo off 
 :end

@@ -23,8 +23,8 @@
 
 #define BC95_CONNECT_ERROR  100
 
-#define RX_LEN              300
-#define SERVER_CMD_LEN      44              //need (length * 2)
+#define RX_LEN              150
+#define SERVER_CMD_LEN      51              //need (length * 2)
 
 #define _CLEAR_RX_TYPEDEF  memset(&bc95_recv, 0, sizeof(bc95_recvTypeDef));
 

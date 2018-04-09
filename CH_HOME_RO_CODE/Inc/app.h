@@ -26,16 +26,18 @@ typedef struct {
     uint32_t    device_mode;            // 设备类型
     uint16_t    pure_tds;               // 纯水TDS 
     uint16_t    raw_tds;                // 原水TDS
-    uint32_t    time;                   // 租赁时间
-    uint32_t    flow;                   // 流量
+    uint32_t    server_time;            // 服务器下发租赁时间
+    uint32_t    server_flow;            // 服务器下发流量
+    uint32_t    flow;                   // 使用的流量
     uint32_t    rinse;                  // 冲洗
-    uint8_t     rinse_time;             // 冲洗时间
+    uint32_t    rinse_time;             // 冲洗时间
     uint32_t    filter[10];             // 滤芯
+    uint32_t    create_water_time_s;    //制水时间秒
     uint32_t    create_water_time_m;    // 制水时间分钟
-    uint8_t     flow_or_time;           // 租赁是用流量还是时间
-    uint8_t     create_water_time_rinse;// 制水多长时间冲洗 刻钟 15分钟一刻钟
+    uint32_t    flow_or_time;           // 租赁是用流量还是时间
+    uint32_t    create_water_time_rinse;// 制水多长时间冲洗 刻钟 15分钟一刻钟
     uint32_t    proportion;             // 时间换算比例
-    uint8_t     use_water_table;        // 是否使用水位
+    uint32_t    use_water_table;        // 是否使用水位
     uint8_t     qr_code[QR_CODE_LEN+1]; // 二维码
 }device_statusTypeDef;
 

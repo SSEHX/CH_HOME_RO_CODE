@@ -1,0 +1,15 @@
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\arm\bin\armproc.dll" 
+
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\arm\bin\armjlink2.dll" 
+
+"C:\Users\orange\iCloudDrive\CH\CH_HOME_RO_CODE\CH_HOME_RO_CODE\EWARM\CH_HOME_RO_CODE\Exe\CH_HOME_RO_CODE.out" 
+
+--plugin "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\arm\bin\armbat.dll" 
+
+--device_macro "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\arm\config\debugger\ST\STM32F1xx_XL.dmac" 
+
+--flash_loader "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0_2\arm\config\flashloader\ST\FlashSTM32F10xx8.board" 
+
+
+
+

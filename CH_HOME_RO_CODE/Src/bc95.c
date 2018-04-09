@@ -37,7 +37,7 @@ uint8_t cmd_set_sended_flag[]       = "AT+NSMI=1\r\n";      /*!<  OK     +NSMI:S
 uint8_t cmd_set_recv_flag[]         = "AT+NNMI=2\r\n";      /*!<  +NNMI              
                                                                   if UE recv a message */
 
-uint8_t cmd_set_pdp_context[]       = "AT+CGDCONT=1,\"IP\",\"psm0.eDRX0.ctnb\"\r\n";
+uint8_t cmd_set_pdp_context[]       = "AT+CGDCONT=1,\"IP\",\"psm0.edrx0.ctnb\"\r\n";
                                                             /*!<  OK                            */
 
 uint8_t cmd_get_server_ip[]         = "AT+NCDP?\r\n";       /*!<  +NCDP:180.101.147.115,5683    */
@@ -66,6 +66,8 @@ uint8_t cmd_coap_have_recv[]  = "+NNMI";
 uint8_t server_ip[]           = "117.60.157.137,5683";
 uint8_t header[]              = "BB666680";
 
+uint8_t test[]                = "AT+NUESTATS\r\n";
+
 /*
 |---------------------------------- 
 |   bc95 status typedef
@@ -82,6 +84,8 @@ bc95_statusTypeDef bc95_status;
  | Return      :    null
 ----------------------------------------------------------------*/
 void bc95_init(){
+    
+    
 
     device_error.bc95_init_error = 0;
     device_error.bc95_init_error += bc95_send_command(cmd_check             , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
@@ -94,7 +98,7 @@ void bc95_init(){
     device_error.bc95_init_error += bc95_send_command(cmd_unset_back        , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
     device_error.bc95_init_error += bc95_send_command(cmd_unset_psm         , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
 
-    device_error.bc95_init_error += bc95_get_imei();
+    //device_error.bc95_init_error += bc95_get_imei();
 
     //device_error.bc95_init_error += bc95_send_command(cmd_set_fully_funtion , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
     device_error.bc95_init_error += bc95_send_command(cmd_set_pdp_context   , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
@@ -102,12 +106,14 @@ void bc95_init(){
     
     device_error.bc95_init_error += bc95_get_iccid();
     device_error.bc95_init_error += bc95_get_imsi();
+    
     device_error.bc95_init_error += bc95_get_profile_status();
     device_error.bc95_init_error += bc95_get_csq();
     device_error.bc95_init_error += bc95_set_server_ip();
     device_error.bc95_init_error += bc95_send_command(cmd_set_recv_flag     , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
     device_error.bc95_init_error += bc95_send_command(cmd_set_sended_flag   , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
-    if(device_error.bc95_init_error != 13){         // if bc95 init have error than reboot bc95 and re init
+    bc95_send_command(test     , cmd_ok, BC95_TIMEOUT, BC95_LOOP_NUMBER);
+    if(device_error.bc95_init_error != 12){         // if bc95 init have error than reboot bc95 and re init
         device_error.bc95_init_error = 1;
         bc95_reboot();
         return;
@@ -118,7 +124,6 @@ void bc95_init(){
         }else{
             bc95_reboot();
         }
-        
     }
 }
 /*----------------------------------------------------------------
@@ -439,7 +444,7 @@ void bc95_reboot(){
 uint8_t bc95_send_coap(uint8_t *ack){
     uint8_t cmd_coap_head[30] = "AT+NMGS=48,";
     uint16_t j = 0;
-    uint8_t cmd[300] = {0};
+    uint8_t cmd[150] = {0};
 
     j += sprintf((char*)cmd, "%s%02x",cmd_coap_head ,device_status.device_registe);
 
@@ -454,7 +459,7 @@ uint8_t bc95_send_coap(uint8_t *ack){
     strcat((char*)cmd, (char*)ByteToHexStr(header, strlen((const char*)header)));
     strcat((char*)cmd, "\r\n");
 
-    if(bc95_send_command(cmd, ack, 30, BC95_LOOP_NUMBER)){
+    if(bc95_send_command(cmd, ack, 20, BC95_LOOP_NUMBER)){
         #ifdef DEBUG    
         printf("SUCCESS:send data to server success\r\n");
         #endif

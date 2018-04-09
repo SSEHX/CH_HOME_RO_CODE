@@ -100,7 +100,7 @@ void MX_USART2_UART_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-    __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
